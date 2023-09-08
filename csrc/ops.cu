@@ -5,13 +5,17 @@
 
 #include <ops.cuh>
 #include <kernels.cuh>
-#include <cub/device/device_scan.cuh>
 #include <limits>
 #include <BinSearch.h>
 #include <cassert>
 #include <common.h>
 
 #define ERR_NOT_IMPLEMENTED 100
+#ifdef BITS_AND_BYTES_USE_ROCM
+#include <hipcub/device/device_scan.hpp>
+#else
+#include <cub/device/device_scan.cuh>
+#endif
 
 
 using namespace BinSearch;
