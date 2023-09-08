@@ -361,7 +361,8 @@ def evaluate_cuda_setup():
 
     if not torch.cuda.is_available():
         return f'libbitsandbytes_cpu{DYNAMIC_LIBRARY_SUFFIX}', None, None, None
-
+    if torch.version.hip: 
+        return 'libbitsandbytes_hip_nohipblaslt.so', None, None, None
     cudart_path = determine_cuda_runtime_lib_path()
     cc = get_compute_capabilities()[-1]  # we take the highest capability
     cuda_version_string = get_cuda_version()
