@@ -743,11 +743,11 @@ template<typename T, int BLOCK_SIZE, int NUM_PER_TH, int STOCHASTIC, int DATA_TY
 __global__ void kQuantizeBlockwise(float * code, T * __restrict__ const A, float *absmax, unsigned char *out, float * __restrict__ const rand, const int rand_offset, const int n)
 {
   #ifdef BNB_USE_HIP
-  const int CUB_NUM_PER_TH=(BLOCK_SIZE/NUM_PER_TH % __AMDGCN_WAVEFRONT_SIZE == 0) ? NUM_PER_TH : NUM_PER_TH/2;
+  const int CUB_NUM_PER_TH = (BLOCK_SIZE/NUM_PER_TH % __AMDGCN_WAVEFRONT_SIZE == 0) ? NUM_PER_TH : NUM_PER_TH/2;
   #else
-  const int CUB_NUM_PER_TH=NUM_PER_TH;
+  const int CUB_NUM_PER_TH = NUM_PER_TH;
   #endif
-  const int DATA_NUM_PER_TH=(DATA_TYPE > 0) ? NUM_PER_TH/2 : CUB_NUM_PER_TH;
+  const int DATA_NUM_PER_TH = (DATA_TYPE > 0) ? NUM_PER_TH/2 : CUB_NUM_PER_TH;
 
   const int n_full = gridDim.x * BLOCK_SIZE;
   int valid_items = 0;
