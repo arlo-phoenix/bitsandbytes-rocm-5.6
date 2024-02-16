@@ -58,7 +58,8 @@ Works well with these docker images:
 
 For installation do:
 ```bash
-make hip ROCM_TARGET=gfx1030
+CC=/opt/rocm/llvm/bin/clang CXX=/opt/rocm/llvm/bin/clang++ cmake -DCOMPUTE_BACKEND=hip -S ..
+make
 pip install .
 ```
 see https://www.llvm.org/docs/AMDGPUUsage.html#processors for finding ROCM_TARGET (e.g. gfx1030 for 6800XT,6900XT) or do `rocminfo | grep gfx`.
