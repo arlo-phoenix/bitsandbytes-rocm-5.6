@@ -211,14 +211,9 @@ if(BUILD_HIP)
     if(NO_CUBLASLT)
         target_compile_definitions(bitsandbytes PUBLIC NO_CUBLASLT)
     else()
-        target_link_libraries(bitsandbytes PUBLIC hip::hipblasLt)
+        find_package(hipblasLt)
+        target_link_libraries(bitsandbytes PUBLIC roc::hipblasLt)
     endif()
-
-
-    set_target_properties(bitsandbytes
-        PROPERTIES
-            HIP_SEPARABLE_COMPILATION ON
-    )
 endif()
 if(BUILD_MPS)
     add_dependencies(bitsandbytes metallib)
