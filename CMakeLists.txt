@@ -201,8 +201,8 @@ if(BUILD_HIP)
     list(APPEND CMAKE_PREFIX_PATH /opt/rocm)
 
     find_package(hipblas REQUIRED)
-    find_package(hipsparse REQUIRED)
     find_package(hiprand REQUIRED)
+    find_package(hipsparse REQUIRED)
 
     ## hacky way of excluding hip::amdhip64 (with it linked many tests unexpectedly fail e.g. adam8bit because of inaccuracies)
     set_target_properties(hip::host PROPERTIES INTERFACE_LINK_LIBRARIES "")
