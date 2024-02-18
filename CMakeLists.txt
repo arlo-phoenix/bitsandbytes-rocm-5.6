@@ -203,29 +203,17 @@ endif()
 if(BUILD_HIP)
     list(APPEND CMAKE_PREFIX_PATH /opt/rocm)
 
-    #actually working linker command (executed manually within CMakeFiles/...)
-    #/opt/rocm/llvm/bin/clang++ -std=c++14 -D__HIP_PLATFORM_HCC__ -D__HIP_PLATFORM_AMD__ -DBUILD_CUDA -DBNB_USE_HIP -shared -fPIC 
-    #./ops.cu.o ./kernels.cu.o ./common.cpp.o ./pythonInterface.cpp.o ./cpu_ops.cpp.o  -L /opt/rocm/lib -lhipblas -lhiprand -lhipsparse 
-    #-o ../../../bitsandbytes/libbitsandbytes_hip_nohipblaslt.so 
-    
     find_package(hipblas REQUIRED)
     find_package(hipsparse REQUIRED)
     find_package(hiprand REQUIRED)
 
-    ## start hacky way of excluding hip::amdhip64 (with it linked many tests unexpectedly fail e.g. adam8bit because of inaccuracies)
-    set_target_properties(hip::host PROPERTIES
-        INTERFACE_LINK_LIBRARIES ""
-    )
-    
-    set_target_properties(hip-lang::host PROPERTIES
-        INTERFACE_LINK_LIBRARIES ""
-    )
-    ## end
-
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    ## hacky way of excluding hip::amdhip64 (with it linked many tests unexpectedly fail e.g. adam8bit because of inaccuracies)
+    set_target_properties(hip::host PROPERTIES INTERFACE_LINK_LIBRARIES "")
+    set_target_properties(hip-lang::host PROPERTIES INTERFACE_LINK_LIBRARIES "")
+    set(CMAKE_HIP_IMPLICIT_LINK_LIBRARIES "")
 
     target_link_libraries(bitsandbytes PUBLIC roc::hipblas hip::hiprand roc::hipsparse)
-    set(CMAKE_HIP_IMPLICIT_LINK_LIBRARIES "")
+
     target_compile_definitions(bitsandbytes PUBLIC BNB_USE_HIP)
     set_source_files_properties(${HIP_FILES} PROPERTIES LANGUAGE HIP)
     set_target_properties(bitsandbytes PROPERTIES LINKER_LANGUAGE CXX)
