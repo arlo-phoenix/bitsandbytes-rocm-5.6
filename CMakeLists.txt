@@ -131,8 +131,6 @@ if(BUILD_CUDA)
     add_compile_definitions(BUILD_CUDA)
 elseif(BUILD_HIP)
     enable_language(HIP)
-    set(CMAKE_HIP_COMPILER "/opt/rocm/bin/hipcc")
-    set(CMAKE_HIP_FLAGS "-std=c++14")
     message(STATUS "HIP Compiler: ${CMAKE_HIP_COMPILER}")
     message(STATUS "HIP Targets: ${HIP_ARCHITECTURES}")
     message(STATUS "HIP Flags: ${CMAKE_HIP_FLAGS}")
@@ -140,6 +138,7 @@ elseif(BUILD_HIP)
     message(STATUS "Linker flags: ${CMAKE_LINKER_FLAGS}")
 
     list(APPEND SRC_FILES ${HIP_FILES})
+
     string(APPEND BNB_OUTPUT_NAME "_hip")
     if(NO_CUBLASLT)
         string(APPEND BNB_OUTPUT_NAME "_nohipblaslt")
@@ -203,20 +202,33 @@ if(BUILD_CUDA)
 endif()
 if(BUILD_HIP)
     list(APPEND CMAKE_PREFIX_PATH /opt/rocm)
-    #target_compile_options(bitsandbytes PRIVATE --offload-arch=gfx1030)
-    #target_compile_options(bitsandbytes PRIVATE -std=c++14 -D__HIP_PLATFORM_HCC__ -D__HIP_PLATFORM_AMD__ -DBUILD_CUDA -DBNB_USE_HIP -fPIC)
-    #set(CMAKE_HIP_ARCHITECTURES gfx1030)
+
+    #actually working linker command (executed manually within CMakeFiles/...)
+    #/opt/rocm/llvm/bin/clang++ -std=c++14 -D__HIP_PLATFORM_HCC__ -D__HIP_PLATFORM_AMD__ -DBUILD_CUDA -DBNB_USE_HIP -shared -fPIC 
+    #./ops.cu.o ./kernels.cu.o ./common.cpp.o ./pythonInterface.cpp.o ./cpu_ops.cpp.o  -L /opt/rocm/lib -lhipblas -lhiprand -lhipsparse 
+    #-o ../../../bitsandbytes/libbitsandbytes_hip_nohipblaslt.so 
     
-    find_package(hip REQUIRED)
     find_package(hipblas REQUIRED)
     find_package(hipsparse REQUIRED)
-    find_package(rocblas REQUIRED)
+    find_package(hiprand REQUIRED)
 
-    target_link_libraries(bitsandbytes PRIVATE hip::device PUBLIC hip::host roc::hipblas roc::hipsparse)
-    set_target_properties(bitsandbytes PROPERTIES LINKER_LANGUAGE CXX)
+    ## start hacky way of excluding hip::amdhip64 (with it linked many tests unexpectedly fail e.g. adam8bit because of inaccuracies)
+    set_target_properties(hip::host PROPERTIES
+        INTERFACE_LINK_LIBRARIES ""
+    )
+    
+    set_target_properties(hip-lang::host PROPERTIES
+        INTERFACE_LINK_LIBRARIES ""
+    )
+    ## end
 
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+    target_link_libraries(bitsandbytes PUBLIC roc::hipblas hip::hiprand roc::hipsparse)
+    set(CMAKE_HIP_IMPLICIT_LINK_LIBRARIES "")
     target_compile_definitions(bitsandbytes PUBLIC BNB_USE_HIP)
     set_source_files_properties(${HIP_FILES} PROPERTIES LANGUAGE HIP)
+    set_target_properties(bitsandbytes PROPERTIES LINKER_LANGUAGE CXX)
 
     if(NO_CUBLASLT)
         target_compile_definitions(bitsandbytes PUBLIC NO_CUBLASLT)
