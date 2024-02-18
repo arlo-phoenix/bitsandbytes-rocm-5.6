@@ -132,10 +132,7 @@ if(BUILD_CUDA)
 elseif(BUILD_HIP)
     enable_language(HIP)
     message(STATUS "HIP Compiler: ${CMAKE_HIP_COMPILER}")
-    message(STATUS "HIP Targets: ${HIP_ARCHITECTURES}")
-    message(STATUS "HIP Flags: ${CMAKE_HIP_FLAGS}")
-    message(STATUS "CXX FLags: ${CXX_FLAGS}")
-    message(STATUS "Linker flags: ${CMAKE_LINKER_FLAGS}")
+    message(STATUS "HIP Targets: ${AMDGPU_TARGETS}")
 
     list(APPEND SRC_FILES ${HIP_FILES})
 
