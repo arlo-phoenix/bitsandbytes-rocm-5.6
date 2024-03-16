@@ -70,6 +70,19 @@ Big thanks to [wkpark](https://github.com/wkpark), [Jamezo97](https://github.com
 </hfoption>
 </hfoptions>
 
+## Compilation with ROCm
+
+This library has only been tested with ROCm 6.0.
+
+For installation do:
+```bash
+pip install -r requirements-dev.txt
+CC=/opt/rocm/llvm/bin/clang CXX=/opt/rocm/llvm/bin/clang++ cmake -DCOMPUTE_BACKEND=hip -S .
+cmake --build . --config Release
+pip install .
+```
+see https://www.llvm.org/docs/AMDGPUUsage.html#processors for finding ROCM_TARGET (e.g. gfx1030 for 6800XT,6900XT) or do `rocminfo | grep gfx`.
+
 ## PyTorch CUDA versions
 
 Some bitsandbytes features may need a newer CUDA version than the one currently supported by PyTorch binaries from Conda and pip. In this case, you should follow these instructions to load a precompiled bitsandbytes binary.

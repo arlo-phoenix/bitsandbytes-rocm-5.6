@@ -85,13 +85,17 @@ class CudaBNBNativeLibrary(BNBNativeLibrary):
 
 def get_native_library() -> BNBNativeLibrary:
     binary_path = PACKAGE_DIR / f"libbitsandbytes_cpu{DYNAMIC_LIBRARY_SUFFIX}"
-    cuda_specs = get_cuda_specs()
-    if cuda_specs:
-        cuda_binary_path = get_cuda_bnb_library_path(cuda_specs)
-        if cuda_binary_path.exists():
-            binary_path = cuda_binary_path
-        else:
-            logger.warning("Could not find the bitsandbytes CUDA binary at %r", cuda_binary_path)
+
+    if torch.version.hip:
+        binary_path = PACKAGE_DIR / f"libbitsandbytes_hip_nohipblaslt{DYNAMIC_LIBRARY_SUFFIX}"
+    else:
+        cuda_specs = get_cuda_specs()
+        if cuda_specs:
+            cuda_binary_path = get_cuda_bnb_library_path(cuda_specs)
+            if cuda_binary_path.exists():
+                binary_path = cuda_binary_path
+            else:
+                logger.warning("Could not find the bitsandbytes CUDA binary at %r", cuda_binary_path)
     logger.debug(f"Loading bitsandbytes native library from: {binary_path}")
     dll = ct.cdll.LoadLibrary(str(binary_path))
 
